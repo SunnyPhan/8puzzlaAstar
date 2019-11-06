@@ -9,8 +9,9 @@ start_time = time.time()
 # print(sys.getrecursionlimit())
 
 
-# Uniform Cost: 50 nodes depth 9 time 0.0024340 seconds
-# Missing tile: 8 nodes depth 4 time 0.000440835 seconds
+# Uniform Cost: 50 nodes depth 9 time 0.0024340 seconds Max q size: 20
+# Missing tile: 8 nodes depth 4 time 0.000440835 seconds Max queueu size: 4
+# Manhattan Distance: 8 nodes depth 4 time 0.0005619 seconds Max q: 4
 initialState = [
     [0,1,2],
     [4,5,3],
@@ -20,40 +21,44 @@ initialState = [
     # [7,5,8]
 ]
 
-# Missing tile: 1391 nodes depth 17 time 0.404481 seconds
-# Manhattan Distance: 174 nodes depth 17 time 0.014513 seconds
+# Uniform cost: 12980 nodes depth 45 time 64.25 seconds Max q size: 4608
+# Missing tile: 1391 nodes depth 17 time 0.404481 seconds Max q size: 540
+# Manhattan Distance: 174 nodes depth 17 time 0.014513 seconds Max q: 68
 medium = [
     [7,4,3],
     [0,6,8],
     [1,5,2]
 ]
 
-
-# Missing tile: 11840 nodes depth 22 time 43.67 seconds
-# Manhattan Distance: 1162 nodes depth 22 time 0.477177 seconds
+# Uniform cost: Hit limit
+# Missing tile: 11840 nodes depth 22 time 43.67 seconds Max q size: 4267
+# Manhattan Distance: 1162 nodes depth 22 time 0.477177 seconds Max q: 430
 hard = [
     [8,5,0],
     [4,3,6],
     [1,2,7]
 ]
 
-# Missing tile: 12980 nodes depth 45 time 51.65 seconds 
-# Manhattan Distance: 2031 nodes depth 45 time 1.043218 seconds
+# Uniform cost: Hit limit
+# Missing tile: 12980 nodes depth 45 time 51.65 seconds Max q size: 4608
+# Manhattan Distance: 2031 nodes depth 45 time 1.043218 seconds Max q: 743
 evenHarder = [
     [6,5,0],
     [1,8,2],
     [7,4,3]
 ]
 
-# Manhattan Distance: 1959 nodes depth 47 time 1.30827 seconds
+# Uniform cost: Hit limit
+# Missing tile: Hit limit
+# Manhattan Distance: 1959 nodes depth 47 time 1.30827 seconds Max q: 703
 puzzle1 = [
     [3,6,1],
     [5,8,7],
     [4,0,2]
 ]
 
-
-# Manhattan Distance: 998 nodes depth 23 time 0.339037 seconds
+# Uniform cost: Hit limit
+# Manhattan Distance: 998 nodes depth 23 time 0.339037 seconds Max q: 348
 puzzle2 = [
     [8,0,6],
     [3,4,5],
@@ -61,8 +66,8 @@ puzzle2 = [
 ]
 
 # Uniform Cost: ??? Nodes depth 2199 time 1.03232 seconds
-# Missing Tile: 82 Nodes depth 10 time 0.00479 seconds
-# Manhattan Distance: 38 nodes depth 10 time 0.0022511 seconds
+# Missing Tile: 82 Nodes depth 10 time 0.00479 seconds Max queue size: 34
+# Manhattan Distance: 38 nodes depth 10 time 0.0022511 seconds Max q: 19
 puzzle3 = [
     [1,2,3],
     [4,5,8],
@@ -238,17 +243,17 @@ def checkManhattan(arr):        #h(n) evaluates the distance from the goal state
 
     length = len(arr)
     
-    idealI = 0 
-    idealJ = 0
+    goalX = 0 
+    goalY = 0
     manhattanDistance = 0
     for x in range(length):
         for y in range(length):
             value = arr[x][y]
-            idealI = math.ceil(value/length)
-            idealJ = abs(value-(idealI-1)*length)
-            idealI -= 1
-            idealJ -= 1
-            difference = abs(idealI-x) + abs(idealJ-y)
+            goalX = math.ceil(value/length)
+            goalY= abs(value-(goalX-1)*length)
+            goalX -= 1
+            goalY -= 1
+            difference = abs(goalX-x) + abs(goalY-y)
             if arr[x][y] == 0:
                 difference = 0
             manhattanDistance+=difference
@@ -285,8 +290,11 @@ printFinished = []
 # *** Make sure to check if the node != none before making children *** 
 def misplacedTiles(parent,nodeCount):
 
+    tempMax = len(fringeNodes)
+    maxFringe = tempMax
+
     if parent.array == goalState:
-        print(nodeCount)
+        print("Expanded Nodes:",nodeCount,"Max queue size:",maxFringe)
         while True:
             printFinished.append(parent.array)
             parent = parent.parent
@@ -368,6 +376,7 @@ def misplacedTiles(parent,nodeCount):
             rightNode.depth = root.depth+1
         rightNode.totalDistance = rightNode.misplaced + rightNode.depth
 
+
     # If the parent node can make children, enqueue the children to fringe and dequeue parent from fringe
     # Make child only if the child if the array does not already exist in repeatStates 
     if downNode.array or upNode.array or leftNode.array or rightNode.array is not None:
@@ -389,6 +398,9 @@ def misplacedTiles(parent,nodeCount):
             fringeNodes.append(rightNode)
             repeatStates.append(rightNode.array)
 
+    if maxFringe < len(fringeNodes):
+        maxFringe = len(fringeNodes)
+    
     #__Prints all the fringes__
     # count = 0 
     # for x in fringeNodes:
@@ -424,8 +436,11 @@ def misplacedTiles(parent,nodeCount):
 
 def uniformCost(parent,nodeCount):
 
+    tempMax = len(fringeNodes)
+    maxFringe = tempMax
+
     if parent.array == goalState:
-        print(nodeCount)
+        print("Expanded Nodes:",nodeCount,"Max queue size:",maxFringe)
         while True:
             printFinished.append(parent.array)
             parent = parent.parent
@@ -532,6 +547,9 @@ def uniformCost(parent,nodeCount):
             fringeNodes.append(rightNode)
             repeatStates.append(rightNode.array)
 
+    if maxFringe < len(fringeNodes):
+        maxFringe = len(fringeNodes)
+
     #__Prints all the fringes__
     # count = 0 
     # for x in fringeNodes:
@@ -566,8 +584,11 @@ def uniformCost(parent,nodeCount):
                 
 def manhattanHeuristic(parent,nodeCount):
 
+    tempMax = len(fringeNodes)
+    maxFringe = tempMax
+
     if parent.array == goalState:
-        print(nodeCount)
+        print("Expanded Nodes:",nodeCount,"Max queue size:",maxFringe)
         while True:
             printFinished.append(parent.array)
             parent = parent.parent
@@ -670,6 +691,9 @@ def manhattanHeuristic(parent,nodeCount):
             fringeNodes.append(rightNode)
             repeatStates.append(rightNode.array)
 
+    if maxFringe < len(fringeNodes):
+        maxFringe = len(fringeNodes)
+
     #__Prints all the fringes__
     # count = 0 
     # for x in fringeNodes:
@@ -703,7 +727,7 @@ def manhattanHeuristic(parent,nodeCount):
                 manhattanHeuristic(y,nodeCount)
                 
 
-generateViable(initialState)
+# generateViable(initialState)
 
 root = Node(puzzle3)
 # misplacedTiles(root,nodeCount)

@@ -5,7 +5,6 @@ import time
 import math
 
 sys.setrecursionlimit(12000)
-start_time = time.time()
 # print(sys.getrecursionlimit())
 
 
@@ -74,11 +73,25 @@ puzzle3 = [
     [0,6,7]
 ]
 
+# Uniform cost: Hit limit
+# Missing tile: Hit limit
+# Manhattan Distance: 5507 nodes depth 26 time 11.0763 seconds4 seconds Max q: 1879
+gettingImpossible = [
+    [0,8,4],
+    [1,7,6],
+    [3,2,5],
+]
+
 goalState = [
     [1,2,3],
     [4,5,6],
     [7,8,0]
 ]
+
+repeatStates = []
+fringeNodes = [] 
+nodeCount = 0
+printFinished = []
 
 # Determine if a state is solvable. Routine is referenced 
 def solvable(initialState):
@@ -281,10 +294,6 @@ class Node:
         self.totalDistance = 0
         self.count = 0 
 
-repeatStates = []
-fringeNodes = [] 
-nodeCount = 0
-printFinished = []
 
 # Input: Parent Node Output: 4 Children nodes w/ depth and h(n)(misplaced tiles)
 # *** Make sure to check if the node != none before making children *** 
@@ -401,19 +410,6 @@ def misplacedTiles(parent,nodeCount):
     if maxFringe < len(fringeNodes):
         maxFringe = len(fringeNodes)
     
-    #__Prints all the fringes__
-    # count = 0 
-    # for x in fringeNodes:
-    #     print("Count:",count)
-    #     count+=1
-    #     printArray(x.array)
-
-    #__Prints all the repeated states__ 
-    # count = 0 
-    # for x in repeatStates:
-    #     printArray(x)
-    #     print("Count;",count)
-    #     count+=1
 
     # Find the fringes with the smallest F(n). If multiple fringes with same F(n), expand fringes with the smallest H(n)
     minDistance = 1000 #Used as a tempto find the smallest distance - F(n)
@@ -550,19 +546,7 @@ def uniformCost(parent,nodeCount):
     if maxFringe < len(fringeNodes):
         maxFringe = len(fringeNodes)
 
-    #__Prints all the fringes__
-    # count = 0 
-    # for x in fringeNodes:
-    #     print("Count:",count)
-    #     count+=1
-    #     printArray(x.array)
 
-    #__Prints all the repeated states__ 
-    # count = 0 
-    # for x in repeatStates:
-    #     printArray(x)
-    #     print("Count;",count)
-    #     count+=1
 
     # Find the fringes with the smallest F(n). If multiple fringes with same F(n), expand fringes with the smallest H(n)
     minDistance = 1000 #Used as a tempto find the smallest distance - F(n)
@@ -694,20 +678,6 @@ def manhattanHeuristic(parent,nodeCount):
     if maxFringe < len(fringeNodes):
         maxFringe = len(fringeNodes)
 
-    #__Prints all the fringes__
-    # count = 0 
-    # for x in fringeNodes:
-    #     print("Count:",count)
-    #     count+=1
-    #     printArray(x.array)
-
-    #__Prints all the repeated states__ 
-    # count = 0 
-    # for x in repeatStates:
-    #     printArray(x)
-    #     print("Count;",count)
-    #     count+=1
-
     # Find the fringes with the smallest F(n). If multiple fringes with same F(n), expand fringes with the smallest H(n)
     minDistance = 1000 #Used as a tempto find the smallest distance - F(n)
     maxDepth = 0
@@ -727,16 +697,68 @@ def manhattanHeuristic(parent,nodeCount):
                 manhattanHeuristic(y,nodeCount)
                 
 
-# generateViable(initialState)
 
-root = Node(puzzle3)
-# misplacedTiles(root,nodeCount)
-# uniformCost(root,nodeCount)
-manhattanHeuristic(root,nodeCount)
+def manuallyInput():
+
+    while True:
+        print("Please input your array from left to right, top down order, followed by an enter after each input")
+        manualState = [
+            [0,0,0],
+            [0,0,0],
+            [0,0,0]
+        ]
+
+        length = len(initialState)
+        for x in range(length):
+            for y in range(length):
+                input1 = input()
+                convert = ord(input1)
+                manualState[x][y] = convert - 48
+
+        if solvable(manualState):
+            return manualState
+        print("That is an unsolvable puzzle! Try again!")
+
+
+
+
+print("Would you like a randomly generated puzzle or would you like to input your own?")
+print("Press R for random or M for manual followed by an enter key")
+input1 = input()
+
+if input1 == "M":
+    initialState = manuallyInput()
+    print("Your puzzle is:")
+    printArray(initialState)
+if input1 == "R":
+    generateViable(initialState)
+    print("Your puzzle is:")
+    printArray(initialState)
+
+
+print("Would you like to run (1) Uniform Cost Search, (2) Misplaced Tile Heuristic, or (3) Manhattan Distance Heuristic? Choose 1, 2, or 3")
+input1 = input()
+
+root = Node(initialState)
+
+if input1 == 1:
+    print("You chose (1) uniform cost")
+    uniformCost(root,nodeCount)
+if input1 == 2:
+    print("You chose (2) misplaced tile")
+    misplacedTiles(root,nodeCount)
+if input1 == 3:
+    print("You chose (3) manhattan distance")
+    manhattanHeuristic(root,nodeCount)
+
+
+start_time = time.time()
 
 printRoute()
 printTime()
 printArray(initialState)
+
+
 
 
 
